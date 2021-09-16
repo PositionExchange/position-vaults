@@ -131,40 +131,6 @@ contract BUSDPosiVault is ReentrancyGuard {
         getSwappingPair().approve(address(router), MAX_INT);
     }
 
-    function addPosiBusdLiquidity(uint256 amountA, uint256 amountB) public returns (uint256) {
-        (,,uint256 liquidityAmount) = router.addLiquidity(
-            address(posi),
-            address(busd),
-            amountA,
-            amountB,
-            0,
-            0,
-            address(this),
-            block.timestamp
-        );
-        return liquidityAmount;
-    }
-    
-    function removeLiquidity(uint256 amoount) public returns (uint256 amountA, uint256 amountB)  {
-         (amountA, amountB) = router.removeLiquidity(
-                address(posi), 
-                address(busd), 
-                amoount, 
-                0, 
-                0, 
-                address(this),
-                block.timestamp
-            );
-    }
-    
-    function swapPosiForBusd(uint256 amountA) public returns(uint256[] memory amounts) {
-         router.swapExactTokensForTokensSupportingFeeOnTransferTokens(amountA, 0, getPosiBusdRoute(), address(this), block.timestamp);
-    }
-    
-    function withdrawFromPool(uint256 lpNeeded) public {
-        posiStakingManager.withdraw(POSI_BUSD_PID, lpNeeded);
-    }
-
     function getReserveInAmount1ByLP(uint256 lp) public view returns (uint256 amount) {
         IUniswapV2Pair pair = getSwappingPair();
         uint256 balance0 = posi.balanceOf(address(pair));
@@ -201,9 +167,17 @@ contract BUSDPosiVault is ReentrancyGuard {
             block.timestamp
         );
         // add liquidity
-       
-        
-        uint256 liquidityAmount = addPosiBusdLiquidity(expectedPosiOut, amount.sub(amountToSwap));
+
+        (,,uint256 liquidityAmount) = router.addLiquidity(
+            address(posi),
+            address(busd),
+            expectedPosiOut,
+            amount.sub(amountToSwap),
+            0,
+            0,
+            address(this),
+            block.timestamp
+        );
         //stake in farms
         posiStakingManager.deposit(POSI_BUSD_PID, liquidityAmount, address(this));
         //set state
@@ -232,9 +206,17 @@ contract BUSDPosiVault is ReentrancyGuard {
         }else{
             //withdraw from farm then remove liquidity
             //calculate LP needed
-            withdrawFromPool(lpAmount);
-            (uint256 amountA, uint256 amountB) = removeLiquidity(lpAmount);
-            swapPosiForBusd(amountA);
+            posiStakingManager.withdraw(POSI_BUSD_PID, lpAmount);
+            (uint256 amountA,uint256 amountB) = router.removeLiquidity(
+                address(posi),
+                address(busd),
+                lpAmount,
+                0,
+                0,
+                address(this),
+                block.timestamp
+            );
+            router.swapExactTokensForTokensSupportingFeeOnTransferTokens(amountA, 0, getPosiBusdRoute(), address(this), block.timestamp);
             // amount = amounts[1].add(amountB);
         }
         busd.transfer(msg.sender, amount.mul(900).div(1000));
@@ -246,7 +228,7 @@ contract BUSDPosiVault is ReentrancyGuard {
     // withdraw LP only
     function emergencyWithdraw(uint256 lpAmount) external {
         require(userInfo[msg.sender].amount >= lpAmount, "!lp");
-        withdrawFromPool(lpAmount);
+        posiStakingManager.withdraw(POSI_BUSD_PID, lpAmount);
         getSwappingPair().transfer(msg.sender, lpAmount);
         userInfo[msg.sender].withdraw(lpAmount);
     }
