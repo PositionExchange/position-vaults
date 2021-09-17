@@ -94,9 +94,14 @@ contract BUSDPosiVault is ReentrancyGuard {
                 .add(posiStakingManager.pendingPosition(POSI_SINGLE_PID, address(this)));
     }
 
-    // total user's pending rewards
+    // total user's rewards: pending + earned
     function pendingEarned(address account) public view returns(uint256) {
-        return 0;
+        return balanceOf(account).mul(
+            pendingRewardPerToken()
+            .sub(userInfo[account].rewardPerTokenPaid)
+            .div(1e18)
+            .add(userInfo[account].rewards)
+        );
     }
 
     // total user's rewards ready to withdraw
@@ -106,6 +111,12 @@ contract BUSDPosiVault is ReentrancyGuard {
             .sub(userInfo[account].rewardPerTokenPaid)
             .div(1e18)
             .add(userInfo[account].rewards)
+        );
+    }
+
+    function pendingRewardPerToken() public view returns(uint256) {
+        return rewardPerToken().add(
+            totalPoolPendingRewards().mul(1e18).div(totalSupply)
         );
     }
 
