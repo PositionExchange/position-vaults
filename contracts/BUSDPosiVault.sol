@@ -40,7 +40,7 @@ contract BUSDPosiVault is ReentrancyGuard {
     event RewardPaid(address account, uint256 reward);
 
     constructor() {
-
+        approve();
     }
 
     modifier updateReward(address account) {
@@ -149,10 +149,9 @@ contract BUSDPosiVault is ReentrancyGuard {
         lpNeeded = amount.mul(totalSuply).div(res1).div(2);
     }
 
-    function deposit(uint256 amount, bool addLiquidity) external {
+    function deposit(uint256 amount, bool addLiquidity) external updateReward(msg.sender) {
         // function to deposit BUSD
         busd.transferFrom(msg.sender, address(this), amount);
-        approve();
         IUniswapV2Pair pair = getSwappingPair();
         (uint256 res0, uint256 res1, ) = pair.getReserves();
         uint256 amountToSwap = calculateSwapInAmount(res1, amount);
@@ -167,7 +166,6 @@ contract BUSDPosiVault is ReentrancyGuard {
             block.timestamp
         );
         // add liquidity
-
         (,,uint256 liquidityAmount) = router.addLiquidity(
             address(posi),
             address(busd),
@@ -185,7 +183,7 @@ contract BUSDPosiVault is ReentrancyGuard {
         totalSupply = totalSupply.add(amount);
     }
 
-    function withdraw(uint256 amount) external {
+    function withdraw(uint256 amount) external updateReward(msg.sender) {
         require(balanceOf(msg.sender) >= amount, "invalid amount");
         // function to withdraw BUSD
         // first calculate how many posi needed in $amount
@@ -233,7 +231,7 @@ contract BUSDPosiVault is ReentrancyGuard {
         userInfo[msg.sender].withdraw(lpAmount);
     }
 
-    function harvest(bool isReceiveBusd) external {
+    function harvest(bool isReceiveBusd) external updateReward(msg.sender) {
         // function to harvest rewards
         uint256 reward = earned(msg.sender);
         if(reward > 0){
