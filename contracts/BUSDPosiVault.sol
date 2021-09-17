@@ -269,11 +269,12 @@ contract BUSDPosiVault is ReentrancyGuard {
             uint256 amountCollected = posi.balanceOf(address(this)).sub(balanceBefore);
             // 5%. TODO move 5% to a variable that configable
             uint256 rewardForCaller = amountCollected.mul(5).div(100);
+            uint256 rewardForPool = amountCollected.sub(rewardForCaller);
             // stake to POSI pool
-            posiStakingManager.deposit(POSI_SINGLE_PID, amountCollected.sub(rewardForCaller), address(this));
+            posiStakingManager.deposit(POSI_SINGLE_PID, rewardForPool, address(this));
             posi.transfer(msg.sender, rewardForCaller);
-            lastPoolReward = lastPoolReward.add(amountCollected.sub(rewardForCaller));
-            emit Compound(msg.sender, amountCollected);
+            lastPoolReward = lastPoolReward.add(rewardForPool);
+            emit Compound(msg.sender, rewardForPool);
         }
     }
 
@@ -288,6 +289,7 @@ contract BUSDPosiVault is ReentrancyGuard {
         paths[1] = address(busd);
     }
 
+    // follow:
     function calculateSwapInAmount(uint256 reserveIn, uint256 userIn)
     internal
     pure
