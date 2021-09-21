@@ -8,7 +8,7 @@ import "./interfaces/IUniswapV2Factory.sol";
 import "./interfaces/IPosiStakingManager.sol";
 import "./interfaces/IUniswapV2Pair.sol";
 import "./library/UserInfo.sol";
-import "../../position-token/contracts/interfaces/IPositionReferral.sol";
+import "./interfaces/IPositionReferral.sol";
 
 /*
 A vault that helps users stake in POSI farms and pools more simply.
@@ -20,17 +20,24 @@ contract BUSDPosiVault is Initializable, ReentrancyGuardUpgradeable {
     using UserInfo for UserInfo.Data;
 
     // MAINNET
-    IERC20 public posi = IERC20(0x5CA42204cDaa70d5c773946e69dE942b85CA6706);
-    IERC20 public busd = IERC20(0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56);
-    IUniswapV2Router02 public router = IUniswapV2Router02(0x10ED43C718714eb63d5aA57B78B54704E256024E);
-    IUniswapV2Factory public factory = IUniswapV2Factory(0xcA143Ce32Fe78f1f7019d7d551a6402fC5350c73);
-    IPosiStakingManager public posiStakingManager = IPosiStakingManager(0x0C54B0b7d61De871dB47c3aD3F69FEB0F2C8db0B);
-    IPositionReferral public positionReferral;
-    uint256 public constant POSI_SINGLE_PID = 1;
-    uint256 public constant POSI_BUSD_PID = 0;
+//    IERC20 public posi = IERC20(0x5CA42204cDaa70d5c773946e69dE942b85CA6706);
+//    IERC20 public busd = IERC20(0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56);
+//    IUniswapV2Router02 public router = IUniswapV2Router02(0x10ED43C718714eb63d5aA57B78B54704E256024E);
+//    IUniswapV2Factory public factory = IUniswapV2Factory(0xcA143Ce32Fe78f1f7019d7d551a6402fC5350c73);
+//    IPosiStakingManager public posiStakingManager = IPosiStakingManager(0x0C54B0b7d61De871dB47c3aD3F69FEB0F2C8db0B);
+//    IPositionReferral public positionReferral;
+//    uint256 public constant POSI_SINGLE_PID = 1;
+//    uint256 public constant POSI_BUSD_PID = 0;
 
     // TESTNET
-
+    IERC20 public posi = IERC20(0xb228359B5D83974F47655Ee41f17F3822A1fD0DD);
+    IERC20 public busd = IERC20(0x787cF64b9F6E3d9E120270Cb84e8Ba1Fe8C1Ae09);
+    IUniswapV2Router02 public router = IUniswapV2Router02(0xD99D1c33F9fC3444f8101754aBC46c52416550D1);
+    IUniswapV2Factory public factory = IUniswapV2Factory(0x6725F303b657a9451d8BA641348b6761A6CC7a17);
+    IPosiStakingManager public posiStakingManager = IPosiStakingManager(0xD0A6C46316f789Ba3bdC320ebCC9AFdaE752fd73);
+    IPositionReferral public positionReferral;
+    uint256 public constant POSI_SINGLE_PID = 1;
+    uint256 public constant POSI_BUSD_PID = 2;
 
     uint256 MAX_INT = 115792089237316195423570985008687907853269984665640564039457584007913129639935;
 
@@ -173,7 +180,7 @@ contract BUSDPosiVault is Initializable, ReentrancyGuardUpgradeable {
         lpNeeded = amount.mul(totalSuply).div(res1).div(2);
     }
 
-    function deposit(uint256 amount, bool addLiquidity) external updateReward(msg.sender) nonReentrant {
+    function deposit(uint256 amount) external updateReward(msg.sender) nonReentrant {
         // function to deposit BUSD
         busd.transferFrom(msg.sender, address(this), amount);
         IUniswapV2Pair pair = getSwappingPair();
@@ -189,22 +196,27 @@ contract BUSDPosiVault is Initializable, ReentrancyGuardUpgradeable {
             address(this),
             block.timestamp
         );
-        // add liquidity
-        (,,uint256 liquidityAmount) = router.addLiquidity(
-            address(posi),
-            address(busd),
-            expectedPosiOut,
-            amount.sub(amountToSwap),
-            0,
-            0,
-            address(this),
-            block.timestamp
-        );
-        //stake in farms
-        posiStakingManager.deposit(POSI_BUSD_PID, liquidityAmount, address(this));
-        //set state
-        userInfo[msg.sender].deposit(amount);
-        totalSupply = totalSupply.add(amount);
+        uint256 amountLeft =  amount.sub(amountToSwap);
+        {
+            // avoid stack too deep
+            // add liquidity
+            (,,uint256 liquidityAmount) = router.addLiquidity(
+                address(posi),
+                address(busd),
+                expectedPosiOut,
+                amountLeft,
+                0,
+                0,
+                address(this),
+                block.timestamp
+            );
+            //stake in farms
+            posiStakingManager.deposit(POSI_BUSD_PID, liquidityAmount, address(this));
+            //set state
+            userInfo[msg.sender].deposit(amount);
+            totalSupply = totalSupply.add(amount);
+        }
+        
     }
 
     function withdraw(uint256 amount) external updateReward(msg.sender) nonReentrant {
