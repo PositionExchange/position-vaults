@@ -1,30 +1,37 @@
 pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import "./interfaces/IUniswapV2Router.sol";
 import "./interfaces/IUniswapV2Factory.sol";
 import "./interfaces/IPosiStakingManager.sol";
 import "./interfaces/IUniswapV2Pair.sol";
 import "./library/UserInfo.sol";
+import "../../position-token/contracts/interfaces/IPositionReferral.sol";
 
 /*
 A vault that helps users stake in POSI farms and pools more simply.
 Supporting auto compound in Single Staking Pool.
 */
 
-contract BUSDPosiVault is ReentrancyGuard {
+contract BUSDPosiVault is Initializable, ReentrancyGuardUpgradeable {
     using SafeMath for uint256;
     using UserInfo for UserInfo.Data;
 
+    // MAINNET
     IERC20 public posi = IERC20(0x5CA42204cDaa70d5c773946e69dE942b85CA6706);
     IERC20 public busd = IERC20(0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56);
     IUniswapV2Router02 public router = IUniswapV2Router02(0x10ED43C718714eb63d5aA57B78B54704E256024E);
     IUniswapV2Factory public factory = IUniswapV2Factory(0xcA143Ce32Fe78f1f7019d7d551a6402fC5350c73);
     IPosiStakingManager public posiStakingManager = IPosiStakingManager(0x0C54B0b7d61De871dB47c3aD3F69FEB0F2C8db0B);
-
+    IPositionReferral public positionReferral;
     uint256 public constant POSI_SINGLE_PID = 1;
     uint256 public constant POSI_BUSD_PID = 0;
+
+    // TESTNET
+
+
     uint256 MAX_INT = 115792089237316195423570985008687907853269984665640564039457584007913129639935;
 
     mapping(address => UserInfo.Data) public userInfo;
@@ -32,16 +39,18 @@ contract BUSDPosiVault is ReentrancyGuard {
     uint256 public rewardPerTokenStored;
     uint256 public lastPoolReward;
     uint256 public lastUpdatePoolReward;
+    uint256 public referralCommissionRate;
 
     event Deposit(address account, uint256 amount);
     event Withdraw(address account, uint256 amount);
     event Harvest(address account, uint256 amount);
     event Compound(address caller, uint256 reward);
     event RewardPaid(address account, uint256 reward);
-
-    constructor() {
-        approve();
-    }
+    event ReferralCommissionPaid(
+        address indexed user,
+        address indexed referrer,
+        uint256 commissionAmount
+    );
 
     modifier updateReward(address account) {
         // due to harvest lockup, lastPoolReward needs wait 8 hours to be updated
@@ -55,6 +64,10 @@ contract BUSDPosiVault is ReentrancyGuard {
             }
         }
         _;
+    }
+
+    function initialize(uint256 _referralCommissionRate) public initializer {
+        approve();
     }
 
     function canCompound() public view returns (bool, uint256) {
@@ -160,7 +173,7 @@ contract BUSDPosiVault is ReentrancyGuard {
         lpNeeded = amount.mul(totalSuply).div(res1).div(2);
     }
 
-    function deposit(uint256 amount, bool addLiquidity) external updateReward(msg.sender) {
+    function deposit(uint256 amount, bool addLiquidity) external updateReward(msg.sender) nonReentrant {
         // function to deposit BUSD
         busd.transferFrom(msg.sender, address(this), amount);
         IUniswapV2Pair pair = getSwappingPair();
@@ -194,7 +207,7 @@ contract BUSDPosiVault is ReentrancyGuard {
         totalSupply = totalSupply.add(amount);
     }
 
-    function withdraw(uint256 amount) external updateReward(msg.sender) {
+    function withdraw(uint256 amount) external updateReward(msg.sender) nonReentrant {
         require(balanceOf(msg.sender) >= amount, "invalid amount");
         // function to withdraw BUSD
         // first calculate how many posi needed in $amount
@@ -265,6 +278,7 @@ contract BUSDPosiVault is ReentrancyGuard {
             }else{
                 posi.transfer(msg.sender, reward);
             }
+            payReferralCommission(msg.sender, reward);
             emit RewardPaid(msg.sender, reward);
         }
     }
@@ -284,6 +298,26 @@ contract BUSDPosiVault is ReentrancyGuard {
             posi.transfer(msg.sender, rewardForCaller);
             lastPoolReward = lastPoolReward.add(rewardForPool);
             emit Compound(msg.sender, rewardForPool);
+        }
+    }
+
+    function payReferralCommission(address _user, uint256 _pending) internal {
+        if(
+            address(posiStakingManager) != address(0)
+            && referralCommissionRate > 0
+        ){
+            address referrer = positionReferral.getReferrer(_user);
+            uint256 commissionAmount = _pending.mul(referralCommissionRate).div(
+                10000
+            );
+            if (referrer != address(0) && commissionAmount > 0) {
+                posi.transfer(referrer, commissionAmount);
+                positionReferral.recordReferralCommission(
+                    referrer,
+                    commissionAmount
+                );
+                emit ReferralCommissionPaid(_user, referrer, commissionAmount);
+            }
         }
     }
 
