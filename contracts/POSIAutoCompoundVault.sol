@@ -1,10 +1,12 @@
 pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "./interfaces/IPosiStakingManager.sol";
 import "./library/UserInfo.sol";
 
 contract POSIAutoCompoundVault is ReentrancyGuard {
+    using SafeMath for uint256;
     using UserInfo for UserInfo.Data;
     IERC20 public posi = IERC20(0x5CA42204cDaa70d5c773946e69dE942b85CA6706);
     IPosiStakingManager public posiStakingManager = IPosiStakingManager(0x0C54B0b7d61De871dB47c3aD3F69FEB0F2C8db0B);
@@ -33,22 +35,67 @@ contract POSIAutoCompoundVault is ReentrancyGuard {
     event Deposit(address account, uint256 amount);
     event Withdraw(address account, uint256 amount);
     event Harvest(address account, uint256 amount);
+    event Compound(address account, uint256 amount);
+    event RewardPaid(address account, uint256 reward);
 
     constructor() {
         approve();
     }
 
-    function earned(
-        address account
-    ) public view returns (
-        uint256
-    ) {
-        return 0;
+    function balanceOf(address user) public view returns(uint256) {
+        return userInfo[msg.sender].amount;
     }
 
-    function rewardPerToken() public view returns (uint256) {
-        return 0;
+    function totalPoolRevenue() public view returns (uint256) {
+        return totalPoolPendingRewards();
     }
+
+    // rewards that ready to withdraw
+    function totalPoolRewards() public view returns (uint256) {
+        (uint256 depositedSinglePool,,,) = posiStakingManager.userInfo(POSI_SINGLE_PID, address(this));
+        // total deposited sub 3% fees while withdrawn - total supply
+        return depositedSinglePool.mul(97).div(100).sub(totalSupply).add(posi.balanceOf(address(this)));
+    }
+
+    function totalPoolPendingRewards() public view returns (uint256) {
+        return posiStakingManager.pendingPosition(POSI_SINGLE_PID, address(this));
+    }
+
+    // total user's rewards: pending + earned
+    function pendingEarned(address account) public view returns(uint256) {
+        return balanceOf(account).mul(
+            pendingRewardPerToken()
+            .sub(userInfo[account].rewardPerTokenPaid)
+            .div(1e18)
+            .add(userInfo[account].rewards)
+        );
+    }
+
+    // total user's rewards ready to withdraw
+    function earned(address account) public view returns(uint256) {
+        return balanceOf(account).mul(
+            rewardPerToken()
+            .sub(userInfo[account].rewardPerTokenPaid)
+            .div(1e18)
+            .add(userInfo[account].rewards)
+        );
+    }
+
+    function pendingRewardPerToken() public view returns(uint256) {
+        return rewardPerToken().add(
+            totalPoolPendingRewards().mul(1e18).div(totalSupply)
+        );
+    }
+
+    function rewardPerToken() public view returns(uint256) {
+        if(totalSupply == 0){
+            return rewardPerTokenStored;
+        }
+        return rewardPerTokenStored.add(
+            (totalPoolRewards().sub(lastUpdatePoolReward)).mul(1e18).div(totalSupply)
+        );
+    }
+
 
     function approve() public {
         posi.approve(address(posiStakingManager), MAX_INT);
@@ -60,6 +107,7 @@ contract POSIAutoCompoundVault is ReentrancyGuard {
         uint256 stakeAmount = posi.balanceOf(address(this));
         posiStakingManager.deposit(POSI_SINGLE_PID, stakeAmount, address(this));
         userInfo[msg.sender].deposit(stakeAmount);
+        totalSupply = totalSupply.add(amount);
         emit Deposit(msg.sender, stakeAmount);
     }
 
@@ -70,13 +118,47 @@ contract POSIAutoCompoundVault is ReentrancyGuard {
         uint256 amountLeft = posi.balanceOf(address(this));
         posi.transfer(msg.sender, amountLeft);
         userInfo[msg.sender].withdraw(amountLeft);
+        totalSupply = totalSupply.sub(amount);
         emit Withdraw(msg.sender, amount);
     }
 
     function harvest() external {
+        // function to harvest rewards
+        uint256 reward = earned(msg.sender);
+        if(reward > 0){
+            userInfo[msg.sender].updateReward(0, 0);
+            uint256 balanceOfThis = posi.balanceOf(address(this));
+            (uint256 stakedAmount,,,) = posiStakingManager.userInfo(POSI_SINGLE_PID, address(this));
+            uint256 reserveAmount = balanceOfThis.add(stakedAmount);
+            if(balanceOfThis < reward){
+                // cover 4 % fee
+                posiStakingManager.withdraw(POSI_SINGLE_PID, reward.sub(balanceOfThis).mul(104).div(100));
+            }
+            posi.transfer(msg.sender, reward);
+            emit RewardPaid(msg.sender, reward);
+        }
     }
 
     function compound() external {
+        // function to compound for pool
+        bool _canCompound = canCompound();
+        if(_canCompound){
+            uint256 balanceBefore = posi.balanceOf(address(this));
+            posiStakingManager.deposit(POSI_SINGLE_PID, 0, address(this));
+            uint256 amountCollected = posi.balanceOf(address(this)).sub(balanceBefore);
+            // 5%. TODO move 5% to a variable that configable
+            uint256 rewardForCaller = amountCollected.mul(5).div(100);
+            uint256 rewardForPool = amountCollected.sub(rewardForCaller);
+            // stake to POSI pool
+            posiStakingManager.deposit(POSI_SINGLE_PID, rewardForPool, address(this));
+            posi.transfer(msg.sender, rewardForCaller);
+            lastPoolReward = lastPoolReward.add(rewardForPool);
+            emit Compound(msg.sender, rewardForPool);
+        }
+    }
+
+    function canCompound() public view returns (bool) {
+        return posiStakingManager.canHarvest(POSI_SINGLE_PID, address(this));
     }
 
 }
