@@ -3,6 +3,7 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "./interfaces/IUniswapV2Router.sol";
 import "./interfaces/IUniswapV2Factory.sol";
 import "./interfaces/IPosiStakingManager.sol";
@@ -15,7 +16,7 @@ A vault that helps users stake in POSI farms and pools more simply.
 Supporting auto compound in Single Staking Pool.
 */
 
-contract BNBPosiVault is Initializable, ReentrancyGuardUpgradeable {
+contract BNBPosiVault is Initializable, ReentrancyGuardUpgradeable, OwnableUpgradeable {
     using SafeMath for uint256;
     using UserInfo for UserInfo.Data;
 
@@ -47,6 +48,7 @@ contract BNBPosiVault is Initializable, ReentrancyGuardUpgradeable {
     uint256 public lastPoolReward;
     uint256 public lastUpdatePoolReward;
     uint256 public referralCommissionRate;
+    uint256 public percentFeeForCompounding;
 
     event Deposit(address account, uint256 amount);
     event Withdraw(address account, uint256 amount);
@@ -153,6 +155,18 @@ contract BNBPosiVault is Initializable, ReentrancyGuardUpgradeable {
         return IUniswapV2Pair(
             factory.getPair(address(posi), address(wbnb))
         );
+    }
+
+    function updatePositionReferral(IPositionReferral _positionReferral) external onlyOwner {
+        positionReferral = _positionReferral;
+    }
+
+    function updateReferralCommissionRate(uint256 _rate) external onlyOwner {
+        referralCommissionRate = _rate;
+    }
+
+    function updatePercentFeeForCompounding(uint256 _rate) external onlyOwner {
+        percentFeeForCompounding = _rate;
     }
 
     function approve() public {
@@ -298,8 +312,7 @@ contract BNBPosiVault is Initializable, ReentrancyGuardUpgradeable {
             uint256 balanceBefore = posi.balanceOf(address(this));
             posiStakingManager.deposit(pid, 0, address(this));
             uint256 amountCollected = posi.balanceOf(address(this)).sub(balanceBefore);
-            // 5%. TODO move 5% to a variable that configable
-            uint256 rewardForCaller = amountCollected.mul(5).div(100);
+            uint256 rewardForCaller = amountCollected.mul(percentFeeForCompounding).div(100);
             uint256 rewardForPool = amountCollected.sub(rewardForCaller);
             // stake to POSI pool
             posiStakingManager.deposit(POSI_SINGLE_PID, rewardForPool, address(this));
@@ -319,6 +332,9 @@ contract BNBPosiVault is Initializable, ReentrancyGuardUpgradeable {
                 10000
             );
             if (referrer != address(0) && commissionAmount > 0) {
+                if(posi.balanceOf(address(this)) < commissionAmount){
+                    posiStakingManager.withdraw(POSI_SINGLE_PID, commissionAmount);
+                }
                 posi.transfer(referrer, commissionAmount);
                 positionReferral.recordReferralCommission(
                     referrer,

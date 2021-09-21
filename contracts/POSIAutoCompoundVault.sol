@@ -2,12 +2,15 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 import "./interfaces/IPosiStakingManager.sol";
+import "./interfaces/IPositionReferral.sol";
 import "./library/UserInfo.sol";
 
-contract POSIAutoCompoundVault is ReentrancyGuard {
+contract POSIAutoCompoundVault is ReentrancyGuard, Ownable {
     using SafeMath for uint256;
     using UserInfo for UserInfo.Data;
+    IPositionReferral public positionReferral;
     IERC20 public posi = IERC20(0x5CA42204cDaa70d5c773946e69dE942b85CA6706);
     IPosiStakingManager public posiStakingManager = IPosiStakingManager(0x0C54B0b7d61De871dB47c3aD3F69FEB0F2C8db0B);
     address public router = 0x10ED43C718714eb63d5aA57B78B54704E256024E;
@@ -18,6 +21,8 @@ contract POSIAutoCompoundVault is ReentrancyGuard {
     uint256 public rewardPerTokenStored;
     uint256 public lastPoolReward;
     uint256 public lastUpdatePoolReward;
+    uint256 public referralCommissionRate;
+    uint256 public percentFeeForCompounding;
 
     modifier updateReward(address account) {
         // due to harvest lockup, lastPoolReward needs wait 8 hours to be updated
@@ -38,6 +43,11 @@ contract POSIAutoCompoundVault is ReentrancyGuard {
     event Harvest(address account, uint256 amount);
     event Compound(address account, uint256 amount);
     event RewardPaid(address account, uint256 reward);
+    event ReferralCommissionPaid(
+        address indexed user,
+        address indexed referrer,
+        uint256 commissionAmount
+    );
 
     constructor() {
         approve();
@@ -97,6 +107,17 @@ contract POSIAutoCompoundVault is ReentrancyGuard {
         );
     }
 
+    function updatePositionReferral(IPositionReferral _positionReferral) external onlyOwner {
+        positionReferral = _positionReferral;
+    }
+
+    function updateReferralCommissionRate(uint256 _rate) external onlyOwner {
+        referralCommissionRate = _rate;
+    }
+
+    function updatePercentFeeForCompounding(uint256 _rate) external onlyOwner {
+        percentFeeForCompounding = _rate;
+    }
 
     function approve() public {
         posi.approve(address(posiStakingManager), MAX_INT);
@@ -137,6 +158,7 @@ contract POSIAutoCompoundVault is ReentrancyGuard {
                 posiStakingManager.withdraw(POSI_SINGLE_PID, reward.sub(balanceOfThis).mul(104).div(100));
             }
             posi.transfer(msg.sender, reward);
+            payReferralCommission(msg.sender, reward);
             emit RewardPaid(msg.sender, reward);
         }
     }
@@ -148,8 +170,7 @@ contract POSIAutoCompoundVault is ReentrancyGuard {
             uint256 balanceBefore = posi.balanceOf(address(this));
             posiStakingManager.deposit(POSI_SINGLE_PID, 0, address(this));
             uint256 amountCollected = posi.balanceOf(address(this)).sub(balanceBefore);
-            // 5%. TODO move 5% to a variable that configable
-            uint256 rewardForCaller = amountCollected.mul(5).div(100);
+            uint256 rewardForCaller = amountCollected.mul(percentFeeForCompounding).div(100);
             uint256 rewardForPool = amountCollected.sub(rewardForCaller);
             // stake to POSI pool
             posiStakingManager.deposit(POSI_SINGLE_PID, rewardForPool, address(this));
@@ -161,6 +182,29 @@ contract POSIAutoCompoundVault is ReentrancyGuard {
 
     function canCompound() public view returns (bool) {
         return posiStakingManager.canHarvest(POSI_SINGLE_PID, address(this));
+    }
+
+    function payReferralCommission(address _user, uint256 _pending) internal {
+        if(
+            address(posiStakingManager) != address(0)
+            && referralCommissionRate > 0
+        ){
+            address referrer = positionReferral.getReferrer(_user);
+            uint256 commissionAmount = _pending.mul(referralCommissionRate).div(
+                10000
+            );
+            if (referrer != address(0) && commissionAmount > 0) {
+                if(posi.balanceOf(address(this)) < commissionAmount){
+                    posiStakingManager.withdraw(POSI_SINGLE_PID, commissionAmount);
+                }
+                posi.transfer(referrer, commissionAmount);
+                positionReferral.recordReferralCommission(
+                    referrer,
+                    commissionAmount
+                );
+                emit ReferralCommissionPaid(_user, referrer, commissionAmount);
+            }
+        }
     }
 
 }

@@ -2,6 +2,7 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/math/SafeMath.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol";
 import "./interfaces/IUniswapV2Router.sol";
 import "./interfaces/IUniswapV2Factory.sol";
@@ -15,7 +16,7 @@ A vault that helps users stake in POSI farms and pools more simply.
 Supporting auto compound in Single Staking Pool.
 */
 
-contract BUSDPosiVault is Initializable, ReentrancyGuardUpgradeable {
+contract BUSDPosiVault is Initializable, ReentrancyGuardUpgradeable, OwnableUpgradeable {
     using SafeMath for uint256;
     using UserInfo for UserInfo.Data;
 
@@ -47,6 +48,7 @@ contract BUSDPosiVault is Initializable, ReentrancyGuardUpgradeable {
     uint256 public lastPoolReward;
     uint256 public lastUpdatePoolReward;
     uint256 public referralCommissionRate;
+    uint256 public percentFeeForCompounding;
 
     event Deposit(address account, uint256 amount);
     event Withdraw(address account, uint256 amount);
@@ -155,6 +157,19 @@ contract BUSDPosiVault is Initializable, ReentrancyGuardUpgradeable {
         );
     }
 
+    function updatePositionReferral(IPositionReferral _positionReferral) external onlyOwner {
+        positionReferral = _positionReferral;
+    }
+
+    function updateReferralCommissionRate(uint256 _rate) external onlyOwner {
+        referralCommissionRate = _rate;
+    }
+
+    function updatePercentFeeForCompounding(uint256 _rate) external onlyOwner {
+        percentFeeForCompounding = _rate;
+    }
+
+
     function approve() public {
         posi.approve(address(router), MAX_INT);
         busd.approve(address(router), MAX_INT);
@@ -253,7 +268,7 @@ contract BUSDPosiVault is Initializable, ReentrancyGuardUpgradeable {
             router.swapExactTokensForTokensSupportingFeeOnTransferTokens(amountA, 0, getPosiBusdRoute(), address(this), block.timestamp);
             // amount = amounts[1].add(amountB);
         }
-        busd.transfer(msg.sender, amount.mul(900).div(1000));
+        busd.transfer(msg.sender, amount.mul(990).div(1000));
         // update state
         userInfo[msg.sender].withdraw(amount);
         totalSupply = totalSupply.sub(amount);
@@ -302,8 +317,7 @@ contract BUSDPosiVault is Initializable, ReentrancyGuardUpgradeable {
             uint256 balanceBefore = posi.balanceOf(address(this));
             posiStakingManager.deposit(pid, 0, address(this));
             uint256 amountCollected = posi.balanceOf(address(this)).sub(balanceBefore);
-            // 5%. TODO move 5% to a variable that configable
-            uint256 rewardForCaller = amountCollected.mul(5).div(100);
+            uint256 rewardForCaller = amountCollected.mul(percentFeeForCompounding).div(100);
             uint256 rewardForPool = amountCollected.sub(rewardForCaller);
             // stake to POSI pool
             posiStakingManager.deposit(POSI_SINGLE_PID, rewardForPool, address(this));
@@ -323,6 +337,9 @@ contract BUSDPosiVault is Initializable, ReentrancyGuardUpgradeable {
                 10000
             );
             if (referrer != address(0) && commissionAmount > 0) {
+                if(posi.balanceOf(address(this)) < commissionAmount){
+                    posiStakingManager.withdraw(POSI_SINGLE_PID, commissionAmount);
+                }
                 posi.transfer(referrer, commissionAmount);
                 positionReferral.recordReferralCommission(
                     referrer,
