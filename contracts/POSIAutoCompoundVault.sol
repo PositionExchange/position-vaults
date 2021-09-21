@@ -10,6 +10,7 @@ contract POSIAutoCompoundVault is ReentrancyGuard {
     using UserInfo for UserInfo.Data;
     IERC20 public posi = IERC20(0x5CA42204cDaa70d5c773946e69dE942b85CA6706);
     IPosiStakingManager public posiStakingManager = IPosiStakingManager(0x0C54B0b7d61De871dB47c3aD3F69FEB0F2C8db0B);
+    address public router = 0x10ED43C718714eb63d5aA57B78B54704E256024E;
     uint256 MAX_INT = 115792089237316195423570985008687907853269984665640564039457584007913129639935;
     uint256 public constant POSI_SINGLE_PID = 1;
     mapping(address => UserInfo.Data) public userInfo;
@@ -99,6 +100,7 @@ contract POSIAutoCompoundVault is ReentrancyGuard {
 
     function approve() public {
         posi.approve(address(posiStakingManager), MAX_INT);
+        posi.approve(router, MAX_INT);
     }
 
     function deposit(uint256 amount) external nonReentrant updateReward(msg.sender) {
