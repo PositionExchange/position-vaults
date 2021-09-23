@@ -1,7 +1,7 @@
 require('@nomiclabs/hardhat-ethers');
 require("@nomiclabs/hardhat-etherscan");
+require('@openzeppelin/hardhat-upgrades');
 require('dotenv').config()
-
 /**
  * @type import('hardhat/config').HardhatUserConfig
  */
@@ -20,10 +20,11 @@ module.exports = {
             accounts: ['0999ffef3b3cf6dc1e85f4cae30edb83920b9c71e6d30c2d1b6345fc253a6795']
         },
         mainnet: {
-            url: "https://bsc-dataseed.binance.org/",
+            url: process.env.RPC_MAINNET_URL,
             chainId: 56,
-            gasPrice: 20000000000,
-            // accounts: [process.env.PRIVATE_KEY]
+            gasPrice: 5000000000,
+            gas: 9000000,
+            accounts: [process.env.PRIVATE_KEY_MAINET]
         }
     },
     etherscan: {

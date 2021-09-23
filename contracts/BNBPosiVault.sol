@@ -21,24 +21,24 @@ contract BNBPosiVault is Initializable, ReentrancyGuardUpgradeable, OwnableUpgra
     using UserInfo for UserInfo.Data;
 
     // MAINNET
-    //    IERC20 public posi = IERC20(0x5CA42204cDaa70d5c773946e69dE942b85CA6706);
-    //    IERC20 public wbnb = IERC20(0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c);
-    //    IUniswapV2Router02 public router = IUniswapV2Router02(0x10ED43C718714eb63d5aA57B78B54704E256024E);
-    //    IUniswapV2Factory public factory = IUniswapV2Factory(0xcA143Ce32Fe78f1f7019d7d551a6402fC5350c73);
-    //    IPosiStakingManager public posiStakingManager = IPosiStakingManager(0x0C54B0b7d61De871dB47c3aD3F69FEB0F2C8db0B);
-    //    IPositionReferral public positionReferral;
-    //    uint256 public constant POSI_SINGLE_PID = 1;
-    //    uint256 public constant POSI_BNB_PID = 0;
+        IERC20 public posi = IERC20(0x5CA42204cDaa70d5c773946e69dE942b85CA6706);
+        IERC20 public wbnb = IERC20(0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c);
+        IUniswapV2Router02 public router = IUniswapV2Router02(0x10ED43C718714eb63d5aA57B78B54704E256024E);
+        IUniswapV2Factory public factory = IUniswapV2Factory(0xcA143Ce32Fe78f1f7019d7d551a6402fC5350c73);
+        IPosiStakingManager public posiStakingManager = IPosiStakingManager(0x0C54B0b7d61De871dB47c3aD3F69FEB0F2C8db0B);
+        IPositionReferral public positionReferral;
+        uint256 public constant POSI_SINGLE_PID = 1;
+        uint256 public constant POSI_BNB_PID = 0;
 
     // TESTNET
-    IERC20 public posi = IERC20(0xb228359B5D83974F47655Ee41f17F3822A1fD0DD);
-    IERC20 public wbnb = IERC20(0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd);
-    IUniswapV2Router02 public router = IUniswapV2Router02(0xD99D1c33F9fC3444f8101754aBC46c52416550D1);
-    IUniswapV2Factory public factory = IUniswapV2Factory(0x6725F303b657a9451d8BA641348b6761A6CC7a17);
-    IPosiStakingManager public posiStakingManager = IPosiStakingManager(0xD0A6C46316f789Ba3bdC320ebCC9AFdaE752fd73);
-    IPositionReferral public positionReferral;
-    uint256 public constant POSI_SINGLE_PID = 1;
-    uint256 public constant POSI_BNB_PID = 3;
+//    IERC20 public posi = IERC20(0xb228359B5D83974F47655Ee41f17F3822A1fD0DD);
+    //    IERC20 public wbnb = IERC20(0xae13d989daC2f0dEbFf460aC112a837C89BAa7cd);
+    //    IUniswapV2Router02 public router = IUniswapV2Router02(0xD99D1c33F9fC3444f8101754aBC46c52416550D1);
+    //    IUniswapV2Factory public factory = IUniswapV2Factory(0x6725F303b657a9451d8BA641348b6761A6CC7a17);
+    //    IPosiStakingManager public posiStakingManager = IPosiStakingManager(0xD0A6C46316f789Ba3bdC320ebCC9AFdaE752fd73);
+    //    IPositionReferral public positionReferral;
+    //    uint256 public constant POSI_SINGLE_PID = 1;
+    //    uint256 public constant POSI_BNB_PID = 3;
 
     uint256 MAX_INT = 115792089237316195423570985008687907853269984665640564039457584007913129639935;
 

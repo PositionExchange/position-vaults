@@ -1,12 +1,16 @@
 {
   "dependencies": {
-    "@nomiclabs/hardhat-ethers": "^2.0.2",
     "@openzeppelin/contracts": "^4.3.1",
     "@openzeppelin/contracts-upgradeable": "^4.3.2",
+    "@openzeppelin/upgrades": "^2.8.0",
+    "chai": "^4.3.4",
     "dotenv": "^10.0.0",
     "hardhat": "^2.6.4"
   },
   "devDependencies": {
-    "@nomiclabs/hardhat-etherscan": "^2.1.6"
+    "@nomiclabs/hardhat-ethers": "^2.0.2",
+    "@nomiclabs/hardhat-etherscan": "^2.1.6",
+    "@openzeppelin/hardhat-upgrades": "^1.10.0",
+    "ethers": "^5.4.7"
   }
 }
