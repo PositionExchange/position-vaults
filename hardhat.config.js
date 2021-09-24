@@ -24,6 +24,7 @@ module.exports = {
             chainId: 56,
             gasPrice: 5000000000,
             gas: 9000000,
+            gasLimit : 9000000,
             accounts: [process.env.PRIVATE_KEY_MAINET]
         }
     },

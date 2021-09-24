@@ -224,7 +224,7 @@ contract BUSDPosiVault is Initializable, ReentrancyGuardUpgradeable, OwnableUpgr
         {
             // avoid stack too deep
             // add liquidity
-            (,,uint256 liquidityAmount) = router.addLiquidity(
+                (,,uint256 liquidityAmount) = router.addLiquidity(
                 address(posi),
                 address(busd),
                 expectedPosiOut,
@@ -237,8 +237,8 @@ contract BUSDPosiVault is Initializable, ReentrancyGuardUpgradeable, OwnableUpgr
             //stake in farms
             posiStakingManager.deposit(POSI_BUSD_PID, liquidityAmount, address(this));
             //set state
-            userInfo[msg.sender].deposit(amount);
-            totalSupply = totalSupply.add(amount);
+            userInfo[msg.sender].deposit(liquidityAmount);
+            totalSupply = totalSupply.add(liquidityAmount);
         }
 
     }
@@ -335,6 +335,8 @@ contract BUSDPosiVault is Initializable, ReentrancyGuardUpgradeable, OwnableUpgr
             emit Compound(msg.sender, rewardForPool);
         }
     }
+
+
 
     function payReferralCommission(address _user, uint256 _pending) internal {
         if (
