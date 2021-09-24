@@ -179,6 +179,7 @@ contract BUSDPosiVault is Initializable, ReentrancyGuardUpgradeable, OwnableUpgr
 
 
     function approve() public {
+        posi.approve(address(posiStakingManager), MAX_INT);
         posi.approve(address(router), MAX_INT);
         busd.approve(address(router), MAX_INT);
         getSwappingPair().approve(address(posiStakingManager), MAX_INT);
