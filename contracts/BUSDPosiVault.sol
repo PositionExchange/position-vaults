@@ -279,8 +279,9 @@ contract BUSDPosiVault is Initializable, ReentrancyGuardUpgradeable, OwnableUpgr
         }
         busd.transfer(msg.sender, amount.mul(990).div(1000));
         // update state
-        userInfo[msg.sender].withdraw(amount);
-        totalSupply = totalSupply.sub(amount);
+
+        userInfo[msg.sender].withdraw(lpAmount);
+        totalSupply = totalSupply.sub(lpAmount);
     }
 
     // withdraw LP only

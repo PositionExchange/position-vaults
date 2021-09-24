@@ -25,10 +25,8 @@ async function processTransactionAndWait(tx, w = 5) {
 
 async function main() {
 
-
     const BUSDPosiVault = await ethers.getContractFactory("BUSDPosiVault");
     const upgraded = await upgrades.upgradeProxy('0xF3d3E84d89e3F5f79e33AC5bf6c62b1f3363234a', BUSDPosiVault);
-
     console.log(upgraded.address);
 }
 
