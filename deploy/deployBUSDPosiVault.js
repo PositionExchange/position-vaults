@@ -1,6 +1,4 @@
-const {version} = require('chai');
-const {her, upgrades, ethers} = require('hardhat')
-
+const { ethers, upgrades } = require("hardhat");
 async function verifyContract(address, args, contract) {
     const verifyObj = {address}
     if (args) {
@@ -27,7 +25,8 @@ async function processTransactionAndWait(tx, w = 5) {
 async function main() {
     const BUSDPosiVault = await ethers.getContractFactory('BUSDPosiVault');
     console.log('Deploying BUSDPosiVault...');
-    const BUSDVaultContract = await upgrades.deployProxy(BUSDPosiVault, {kind: 'transparent'});
+    const BUSDVaultContract = await upgrades.deployProxy(BUSDPosiVault, []);
+    await BUSDVaultContract.deployed()
     console.log("BUSDPosiVault", BUSDVaultContract)
     console.log('BUSDVaultContract deployed to:', BUSDVaultContract.address);
 }

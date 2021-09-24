@@ -31,7 +31,4 @@ library UserInfo {
         data.rewards = rewards;
         data.rewardPerTokenPaid = rewardPerTokenPaid;
     }
-
-    
-
 }

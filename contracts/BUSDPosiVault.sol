@@ -79,7 +79,6 @@ contract BUSDPosiVault is Initializable, ReentrancyGuardUpgradeable, OwnableUpgr
     function initialize() public initializer {
         __ReentrancyGuard_init();
         __Ownable_init();
-        approve();
         posi = IERC20(0x5CA42204cDaa70d5c773946e69dE942b85CA6706);
         busd = IERC20(0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56);
         router = IUniswapV2Router02(0x10ED43C718714eb63d5aA57B78B54704E256024E);
