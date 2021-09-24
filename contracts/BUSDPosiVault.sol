@@ -96,7 +96,7 @@ contract BUSDPosiVault is Initializable, ReentrancyGuardUpgradeable, OwnableUpgr
     function nearestCompoundingTime() public view returns (uint256) {
         (,,,uint256 pool1CompoundingTime) = posiStakingManager.userInfo(POSI_BUSD_PID, address(this));
         (,,,uint256 pool2CompoundingTime) = posiStakingManager.userInfo(POSI_SINGLE_PID, address(this));
-        if (pool1CompoundingTime < pool2CompoundingTime) {
+        if (pool2CompoundingTime == 0 || pool1CompoundingTime < pool2CompoundingTime) {
             return pool1CompoundingTime;
         }
         return pool2CompoundingTime;
