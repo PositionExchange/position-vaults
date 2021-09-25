@@ -103,7 +103,7 @@ contract BUSDPosiVault is Initializable, ReentrancyGuardUpgradeable, OwnableUpgr
     }
 
     function balanceOf(address user) public view returns (uint256) {
-        return getReserveInAmount1ByLP(userInfo[msg.sender].amount);
+        return getReserveInAmount1ByLP(userInfo[user].amount);
     }
 
     function totalPoolRevenue() public view returns (uint256) {
@@ -224,7 +224,7 @@ contract BUSDPosiVault is Initializable, ReentrancyGuardUpgradeable, OwnableUpgr
         {
             // avoid stack too deep
             // add liquidity
-                (,,uint256 liquidityAmount) = router.addLiquidity(
+            (,,uint256 liquidityAmount) = router.addLiquidity(
                 address(posi),
                 address(busd),
                 expectedPosiOut,
@@ -337,6 +337,14 @@ contract BUSDPosiVault is Initializable, ReentrancyGuardUpgradeable, OwnableUpgr
         }
     }
 
+    function pendingPositionNextCompound() public view returns (uint256){
+        (, uint256 pid) = canCompound();
+        return posiStakingManager.pendingPosition(pid, address(this));
+    }
+
+    function rewardForCompounder() external view returns (uint256){
+        return pendingPositionNextCompound().mul(percentFeeForCompounding).div(100);
+    }
 
 
     function payReferralCommission(address _user, uint256 _pending) internal {
@@ -361,6 +369,7 @@ contract BUSDPosiVault is Initializable, ReentrancyGuardUpgradeable, OwnableUpgr
             }
         }
     }
+
 
     function getBusdPosiRoute() private view returns (address[] memory paths) {
         paths = new address[](2);

@@ -44,6 +44,11 @@
       "address": "0xF3d3E84d89e3F5f79e33AC5bf6c62b1f3363234a",
       "txHash": "0x53886bff387d952d88440aef1b59feeb16fa5dcdccb4a7f9da7e4ec8e6532be7",
       "kind": "transparent"
+    },
+    {
+      "address": "0x2A11b3c92906BB70962E289DccC373606cbC893E",
+      "txHash": "0xd6b7e66d9c1e4c2d90107c39fa4e863538d6157cce61a58bc76aa10276c51033",
+      "kind": "transparent"
     }
   ],
   "impls": {
@@ -425,6 +430,564 @@
             "label": "address"
           },
           "t_struct(Data)5443_storage": {
+            "label": "struct UserInfo.Data",
+            "members": [
+              {
+                "label": "amount",
+                "type": "t_uint256"
+              },
+              {
+                "label": "rewards",
+                "type": "t_uint256"
+              },
+              {
+                "label": "rewardPerTokenPaid",
+                "type": "t_uint256"
+              }
+            ]
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]"
+          },
+          "t_bool": {
+            "label": "bool"
+          }
+        }
+      }
+    },
+    "d4a06e6e22883fb965bded34105b45bb9f3229063834e4d90ae6a0d7bbe4b58b": {
+      "address": "0xb81189390676026743422A44C40fbD322dc751B9",
+      "txHash": "0x6bba3f00f6788979d51127ab97098e1f63cdc0ab1738c3cdaae0260591c99faa",
+      "layout": {
+        "storage": [
+          {
+            "contract": "Initializable",
+            "label": "_initialized",
+            "type": "t_bool",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:21"
+          },
+          {
+            "contract": "Initializable",
+            "label": "_initializing",
+            "type": "t_bool",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:26"
+          },
+          {
+            "contract": "ReentrancyGuardUpgradeable",
+            "label": "_status",
+            "type": "t_uint256",
+            "src": "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol:37"
+          },
+          {
+            "contract": "ReentrancyGuardUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)49_storage",
+            "src": "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol:67"
+          },
+          {
+            "contract": "ContextUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)50_storage",
+            "src": "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol:30"
+          },
+          {
+            "contract": "OwnableUpgradeable",
+            "label": "_owner",
+            "type": "t_address",
+            "src": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:21"
+          },
+          {
+            "contract": "OwnableUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)49_storage",
+            "src": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:77"
+          },
+          {
+            "contract": "BUSDPosiVault",
+            "label": "posi",
+            "type": "t_contract(IERC20)350",
+            "src": "contracts/BUSDPosiVault.sol:25"
+          },
+          {
+            "contract": "BUSDPosiVault",
+            "label": "busd",
+            "type": "t_contract(IERC20)350",
+            "src": "contracts/BUSDPosiVault.sol:26"
+          },
+          {
+            "contract": "BUSDPosiVault",
+            "label": "router",
+            "type": "t_contract(IUniswapV2Router02)2999",
+            "src": "contracts/BUSDPosiVault.sol:27"
+          },
+          {
+            "contract": "BUSDPosiVault",
+            "label": "factory",
+            "type": "t_contract(IUniswapV2Factory)2364",
+            "src": "contracts/BUSDPosiVault.sol:28"
+          },
+          {
+            "contract": "BUSDPosiVault",
+            "label": "posiStakingManager",
+            "type": "t_contract(IPosiStakingManager)2274",
+            "src": "contracts/BUSDPosiVault.sol:29"
+          },
+          {
+            "contract": "BUSDPosiVault",
+            "label": "positionReferral",
+            "type": "t_contract(IPositionReferral)2301",
+            "src": "contracts/BUSDPosiVault.sol:30"
+          },
+          {
+            "contract": "BUSDPosiVault",
+            "label": "MAX_INT",
+            "type": "t_uint256",
+            "src": "contracts/BUSDPosiVault.sol:44"
+          },
+          {
+            "contract": "BUSDPosiVault",
+            "label": "userInfo",
+            "type": "t_mapping(t_address,t_struct(Data)3012_storage)",
+            "src": "contracts/BUSDPosiVault.sol:46"
+          },
+          {
+            "contract": "BUSDPosiVault",
+            "label": "totalSupply",
+            "type": "t_uint256",
+            "src": "contracts/BUSDPosiVault.sol:47"
+          },
+          {
+            "contract": "BUSDPosiVault",
+            "label": "rewardPerTokenStored",
+            "type": "t_uint256",
+            "src": "contracts/BUSDPosiVault.sol:48"
+          },
+          {
+            "contract": "BUSDPosiVault",
+            "label": "lastPoolReward",
+            "type": "t_uint256",
+            "src": "contracts/BUSDPosiVault.sol:49"
+          },
+          {
+            "contract": "BUSDPosiVault",
+            "label": "lastUpdatePoolReward",
+            "type": "t_uint256",
+            "src": "contracts/BUSDPosiVault.sol:50"
+          },
+          {
+            "contract": "BUSDPosiVault",
+            "label": "referralCommissionRate",
+            "type": "t_uint256",
+            "src": "contracts/BUSDPosiVault.sol:51"
+          },
+          {
+            "contract": "BUSDPosiVault",
+            "label": "percentFeeForCompounding",
+            "type": "t_uint256",
+            "src": "contracts/BUSDPosiVault.sol:52"
+          }
+        ],
+        "types": {
+          "t_contract(IERC20)350": {
+            "label": "contract IERC20"
+          },
+          "t_contract(IUniswapV2Router02)2999": {
+            "label": "contract IUniswapV2Router02"
+          },
+          "t_contract(IUniswapV2Factory)2364": {
+            "label": "contract IUniswapV2Factory"
+          },
+          "t_contract(IPosiStakingManager)2274": {
+            "label": "contract IPosiStakingManager"
+          },
+          "t_contract(IPositionReferral)2301": {
+            "label": "contract IPositionReferral"
+          },
+          "t_uint256": {
+            "label": "uint256"
+          },
+          "t_mapping(t_address,t_struct(Data)3012_storage)": {
+            "label": "mapping(address => struct UserInfo.Data)"
+          },
+          "t_address": {
+            "label": "address"
+          },
+          "t_struct(Data)3012_storage": {
+            "label": "struct UserInfo.Data",
+            "members": [
+              {
+                "label": "amount",
+                "type": "t_uint256"
+              },
+              {
+                "label": "rewards",
+                "type": "t_uint256"
+              },
+              {
+                "label": "rewardPerTokenPaid",
+                "type": "t_uint256"
+              }
+            ]
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]"
+          },
+          "t_bool": {
+            "label": "bool"
+          }
+        }
+      }
+    },
+    "e30320e3275a520e4f003f6fd00d559c42d95b10fb80da3bd28189229300577a": {
+      "address": "0x6d81C3325F2CAfCf041C13C95C9233D137D69f5E",
+      "txHash": "0xa818c0ef8aa93fed756420b4dd769ba19d30c4ab35462b41608192a73f229cce",
+      "layout": {
+        "storage": [
+          {
+            "contract": "Initializable",
+            "label": "_initialized",
+            "type": "t_bool",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:21"
+          },
+          {
+            "contract": "Initializable",
+            "label": "_initializing",
+            "type": "t_bool",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:26"
+          },
+          {
+            "contract": "ReentrancyGuardUpgradeable",
+            "label": "_status",
+            "type": "t_uint256",
+            "src": "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol:37"
+          },
+          {
+            "contract": "ReentrancyGuardUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)49_storage",
+            "src": "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol:67"
+          },
+          {
+            "contract": "ContextUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)50_storage",
+            "src": "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol:30"
+          },
+          {
+            "contract": "OwnableUpgradeable",
+            "label": "_owner",
+            "type": "t_address",
+            "src": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:21"
+          },
+          {
+            "contract": "OwnableUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)49_storage",
+            "src": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:77"
+          },
+          {
+            "contract": "BUSDPosiVault",
+            "label": "posi",
+            "type": "t_contract(IERC20)350",
+            "src": "contracts/BUSDPosiVault.sol:25"
+          },
+          {
+            "contract": "BUSDPosiVault",
+            "label": "busd",
+            "type": "t_contract(IERC20)350",
+            "src": "contracts/BUSDPosiVault.sol:26"
+          },
+          {
+            "contract": "BUSDPosiVault",
+            "label": "router",
+            "type": "t_contract(IUniswapV2Router02)2998",
+            "src": "contracts/BUSDPosiVault.sol:27"
+          },
+          {
+            "contract": "BUSDPosiVault",
+            "label": "factory",
+            "type": "t_contract(IUniswapV2Factory)2363",
+            "src": "contracts/BUSDPosiVault.sol:28"
+          },
+          {
+            "contract": "BUSDPosiVault",
+            "label": "posiStakingManager",
+            "type": "t_contract(IPosiStakingManager)2273",
+            "src": "contracts/BUSDPosiVault.sol:29"
+          },
+          {
+            "contract": "BUSDPosiVault",
+            "label": "positionReferral",
+            "type": "t_contract(IPositionReferral)2300",
+            "src": "contracts/BUSDPosiVault.sol:30"
+          },
+          {
+            "contract": "BUSDPosiVault",
+            "label": "MAX_INT",
+            "type": "t_uint256",
+            "src": "contracts/BUSDPosiVault.sol:44"
+          },
+          {
+            "contract": "BUSDPosiVault",
+            "label": "userInfo",
+            "type": "t_mapping(t_address,t_struct(Data)3011_storage)",
+            "src": "contracts/BUSDPosiVault.sol:46"
+          },
+          {
+            "contract": "BUSDPosiVault",
+            "label": "totalSupply",
+            "type": "t_uint256",
+            "src": "contracts/BUSDPosiVault.sol:47"
+          },
+          {
+            "contract": "BUSDPosiVault",
+            "label": "rewardPerTokenStored",
+            "type": "t_uint256",
+            "src": "contracts/BUSDPosiVault.sol:48"
+          },
+          {
+            "contract": "BUSDPosiVault",
+            "label": "lastPoolReward",
+            "type": "t_uint256",
+            "src": "contracts/BUSDPosiVault.sol:49"
+          },
+          {
+            "contract": "BUSDPosiVault",
+            "label": "lastUpdatePoolReward",
+            "type": "t_uint256",
+            "src": "contracts/BUSDPosiVault.sol:50"
+          },
+          {
+            "contract": "BUSDPosiVault",
+            "label": "referralCommissionRate",
+            "type": "t_uint256",
+            "src": "contracts/BUSDPosiVault.sol:51"
+          },
+          {
+            "contract": "BUSDPosiVault",
+            "label": "percentFeeForCompounding",
+            "type": "t_uint256",
+            "src": "contracts/BUSDPosiVault.sol:52"
+          }
+        ],
+        "types": {
+          "t_contract(IERC20)350": {
+            "label": "contract IERC20"
+          },
+          "t_contract(IUniswapV2Router02)2998": {
+            "label": "contract IUniswapV2Router02"
+          },
+          "t_contract(IUniswapV2Factory)2363": {
+            "label": "contract IUniswapV2Factory"
+          },
+          "t_contract(IPosiStakingManager)2273": {
+            "label": "contract IPosiStakingManager"
+          },
+          "t_contract(IPositionReferral)2300": {
+            "label": "contract IPositionReferral"
+          },
+          "t_uint256": {
+            "label": "uint256"
+          },
+          "t_mapping(t_address,t_struct(Data)3011_storage)": {
+            "label": "mapping(address => struct UserInfo.Data)"
+          },
+          "t_address": {
+            "label": "address"
+          },
+          "t_struct(Data)3011_storage": {
+            "label": "struct UserInfo.Data",
+            "members": [
+              {
+                "label": "amount",
+                "type": "t_uint256"
+              },
+              {
+                "label": "rewards",
+                "type": "t_uint256"
+              },
+              {
+                "label": "rewardPerTokenPaid",
+                "type": "t_uint256"
+              }
+            ]
+          },
+          "t_array(t_uint256)49_storage": {
+            "label": "uint256[49]"
+          },
+          "t_array(t_uint256)50_storage": {
+            "label": "uint256[50]"
+          },
+          "t_bool": {
+            "label": "bool"
+          }
+        }
+      }
+    },
+    "90102b3d3d558295080e986b30b4cc3d5df84651c4e20b31ba80b0c5ea4f51a8": {
+      "address": "0x2284FecA9cad7F42aaA488631A4FFC79Ab1f46fE",
+      "txHash": "0xf24030b3215b753d124c094e40fe3a182c758d5195a3bed6f416c6f42c0938ec",
+      "layout": {
+        "storage": [
+          {
+            "contract": "Initializable",
+            "label": "_initialized",
+            "type": "t_bool",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:21"
+          },
+          {
+            "contract": "Initializable",
+            "label": "_initializing",
+            "type": "t_bool",
+            "src": "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol:26"
+          },
+          {
+            "contract": "ReentrancyGuardUpgradeable",
+            "label": "_status",
+            "type": "t_uint256",
+            "src": "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol:37"
+          },
+          {
+            "contract": "ReentrancyGuardUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)49_storage",
+            "src": "@openzeppelin/contracts-upgradeable/security/ReentrancyGuardUpgradeable.sol:67"
+          },
+          {
+            "contract": "ContextUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)50_storage",
+            "src": "@openzeppelin/contracts-upgradeable/utils/ContextUpgradeable.sol:30"
+          },
+          {
+            "contract": "OwnableUpgradeable",
+            "label": "_owner",
+            "type": "t_address",
+            "src": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:21"
+          },
+          {
+            "contract": "OwnableUpgradeable",
+            "label": "__gap",
+            "type": "t_array(t_uint256)49_storage",
+            "src": "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol:77"
+          },
+          {
+            "contract": "BUSDPosiVault",
+            "label": "posi",
+            "type": "t_contract(IERC20)350",
+            "src": "contracts/BUSDPosiVault.sol:25"
+          },
+          {
+            "contract": "BUSDPosiVault",
+            "label": "busd",
+            "type": "t_contract(IERC20)350",
+            "src": "contracts/BUSDPosiVault.sol:26"
+          },
+          {
+            "contract": "BUSDPosiVault",
+            "label": "router",
+            "type": "t_contract(IUniswapV2Router02)3033",
+            "src": "contracts/BUSDPosiVault.sol:27"
+          },
+          {
+            "contract": "BUSDPosiVault",
+            "label": "factory",
+            "type": "t_contract(IUniswapV2Factory)2398",
+            "src": "contracts/BUSDPosiVault.sol:28"
+          },
+          {
+            "contract": "BUSDPosiVault",
+            "label": "posiStakingManager",
+            "type": "t_contract(IPosiStakingManager)2308",
+            "src": "contracts/BUSDPosiVault.sol:29"
+          },
+          {
+            "contract": "BUSDPosiVault",
+            "label": "positionReferral",
+            "type": "t_contract(IPositionReferral)2335",
+            "src": "contracts/BUSDPosiVault.sol:30"
+          },
+          {
+            "contract": "BUSDPosiVault",
+            "label": "MAX_INT",
+            "type": "t_uint256",
+            "src": "contracts/BUSDPosiVault.sol:44"
+          },
+          {
+            "contract": "BUSDPosiVault",
+            "label": "userInfo",
+            "type": "t_mapping(t_address,t_struct(Data)3046_storage)",
+            "src": "contracts/BUSDPosiVault.sol:46"
+          },
+          {
+            "contract": "BUSDPosiVault",
+            "label": "totalSupply",
+            "type": "t_uint256",
+            "src": "contracts/BUSDPosiVault.sol:47"
+          },
+          {
+            "contract": "BUSDPosiVault",
+            "label": "rewardPerTokenStored",
+            "type": "t_uint256",
+            "src": "contracts/BUSDPosiVault.sol:48"
+          },
+          {
+            "contract": "BUSDPosiVault",
+            "label": "lastPoolReward",
+            "type": "t_uint256",
+            "src": "contracts/BUSDPosiVault.sol:49"
+          },
+          {
+            "contract": "BUSDPosiVault",
+            "label": "lastUpdatePoolReward",
+            "type": "t_uint256",
+            "src": "contracts/BUSDPosiVault.sol:50"
+          },
+          {
+            "contract": "BUSDPosiVault",
+            "label": "referralCommissionRate",
+            "type": "t_uint256",
+            "src": "contracts/BUSDPosiVault.sol:51"
+          },
+          {
+            "contract": "BUSDPosiVault",
+            "label": "percentFeeForCompounding",
+            "type": "t_uint256",
+            "src": "contracts/BUSDPosiVault.sol:52"
+          }
+        ],
+        "types": {
+          "t_contract(IERC20)350": {
+            "label": "contract IERC20"
+          },
+          "t_contract(IUniswapV2Router02)3033": {
+            "label": "contract IUniswapV2Router02"
+          },
+          "t_contract(IUniswapV2Factory)2398": {
+            "label": "contract IUniswapV2Factory"
+          },
+          "t_contract(IPosiStakingManager)2308": {
+            "label": "contract IPosiStakingManager"
+          },
+          "t_contract(IPositionReferral)2335": {
+            "label": "contract IPositionReferral"
+          },
+          "t_uint256": {
+            "label": "uint256"
+          },
+          "t_mapping(t_address,t_struct(Data)3046_storage)": {
+            "label": "mapping(address => struct UserInfo.Data)"
+          },
+          "t_address": {
+            "label": "address"
+          },
+          "t_struct(Data)3046_storage": {
             "label": "struct UserInfo.Data",
             "members": [
               {
